@@ -1,0 +1,5 @@
+# enviornment variables
+.env
+
+# package checksum
+go.sum
