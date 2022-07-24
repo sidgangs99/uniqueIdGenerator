@@ -2,56 +2,49 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
+	"strings"
+	"strconv"
 
-	"github.com/julienschmidt/httprouter"
-	"github.com/spf13/viper"
+	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
+
+	"github.com/sidgangs99/uniqueIdGenerator.git/src/health"
 )
 
-// ServerAddr defines the http host and port of the beer server
-const ServerAddr = "localhost:8080"
-
-var router *httprouter.Router
-
-func viperEnvVariable(key string) string {
-
-	// SetConfigFile explicitly defines the path, name and extension of the config file.
-	// Viper will use this and not check any of the config paths.
-	// .env - It will search for the .env file in the current directory
-	viper.SetConfigFile(".env")
-
-	// Find and read the config file
-	err := viper.ReadInConfig()
-
-	if err != nil {
-		log.Fatalf("Error while reading config file %s", err)
-	}
-
-	// viper.Get() returns an empty interface{}
-	// to get the underlying type of the key,
-	// we have to do the type assertion, we know the underlying value is string
-	// if we type assert to other type it will throw an error
-	value, ok := viper.Get(key).(string)
-
-	// If the type is a string then ok will be true
-	// ok will make sure the program not break
-	if !ok {
-		log.Fatalf("Invalid type assertion")
-	}
-
-	return value
-}
-
-// note: avoid using init
-func init() {
-
-	router = httprouter.New()
-
-	router.GET("/ping", HealthCheck)
-}
+// TODO: import this from env variables
+var port = 8000
+var serverApi = "127.0.0.1:" + strconv.Itoa(port)
 
 func main() {
-	fmt.Println("The Server is on active at: http://localhost:8080.")
-	log.Fatal(http.ListenAndServe(ServerAddr, router))
+
+	log.Info("Starting server, ", serverApi)
+	router := mux.NewRouter().StrictSlash(true)
+	router.Use(loggingMiddleware)
+	// http.Handle("/", middleware.HttpInterceptor(router))
+	mount(router, "/health", health.Router())
+	
+	err := http.ListenAndServe(serverApi, router)
+
+	if err != nil {
+        fmt.Println(err)
+    }
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        // Do stuff here
+        log.Println(r.RequestURI)
+        // Call the next handler, which can be another middleware in the chain, or the final handler.
+        next.ServeHTTP(w, r)
+    })
+}
+
+func mount(r *mux.Router, path string, handler http.Handler) {
+	r.PathPrefix(path).Handler(
+		http.StripPrefix(
+			strings.TrimSuffix(path, "/"),
+			handler,
+		),
+    )
 }
