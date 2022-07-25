@@ -10,20 +10,26 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/sidgangs99/uniqueIdGenerator.git/src/health"
+	"github.com/sidgangs99/uniqueIdGenerator.git/src/middleware"
+	"github.com/sidgangs99/uniqueIdGenerator.git/src/uniqueId"
 )
 
 // TODO: import this from env variables
 var port = 8000
 var serverApi = "127.0.0.1:" + strconv.Itoa(port)
 
+// TODO: Add log levels to the environment	
+// TODO: Error handlers should be created here instead
+// TODO: API path should be relative
 func main() {
 
 	log.Info("Starting server, ", serverApi)
 	router := mux.NewRouter().StrictSlash(true)
-	router.Use(loggingMiddleware)
-	// http.Handle("/", middleware.HttpInterceptor(router))
-	mount(router, "/health", health.Router())
+	router.Use(middleware.LoggingMiddleware)
 	
+	mount(router, "/health", health.Router())
+	mount(router, "/uniqueId", uniqueId.Router())
+
 	err := http.ListenAndServe(serverApi, router)
 
 	if err != nil {
@@ -31,14 +37,7 @@ func main() {
     }
 }
 
-func loggingMiddleware(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        // Do stuff here
-        log.Println(r.RequestURI)
-        // Call the next handler, which can be another middleware in the chain, or the final handler.
-        next.ServeHTTP(w, r)
-    })
-}
+
 
 func mount(r *mux.Router, path string, handler http.Handler) {
 	r.PathPrefix(path).Handler(

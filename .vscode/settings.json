@@ -1,5 +1,9 @@
 {
-    "cSpell.words": [
-        "Subrouter"
-    ]
+  "cSpell.words": ["logrus", "sirupsen", "Subrouter"],
+  "[go]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  }
 }

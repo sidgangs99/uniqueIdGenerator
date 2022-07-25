@@ -1,0 +1,5 @@
+package uniqueId
+
+func generateShortUniqueIdService(){
+
+}
