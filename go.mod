@@ -3,6 +3,7 @@ module github.com/sidgangs99/uniqueIdGenerator.git
 go 1.15
 
 require (
+	github.com/catinello/base62 v0.0.0-20210103152244-29b605f01e9b // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/sirupsen/logrus v1.9.0 // indirect
