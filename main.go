@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -15,22 +14,21 @@ import (
 )
 
 // TODO: import this from env variables
-var port = 8000
-var serverApi = "127.0.0.1:" + strconv.Itoa(port)
+var port = ":8000"
 
 // TODO: Add log levels to the environment	
 // TODO: Error handlers should be created here instead
 // TODO: API path should be relative
 func main() {
 
-	log.Info("Starting server, ", serverApi)
+	log.Info("Starting server, ", port)
 	router := mux.NewRouter().StrictSlash(true)
 	router.Use(middleware.LoggingMiddleware)
 	
 	mount(router, "/health", health.Router())
 	mount(router, "/uniqueId", uniqueId.Router())
 
-	err := http.ListenAndServe(serverApi, router)
+	err := http.ListenAndServe(port, router)
 
 	if err != nil {
         fmt.Println(err)
